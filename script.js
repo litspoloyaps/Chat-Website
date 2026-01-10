@@ -18,3 +18,10 @@ socket.on("chat message", (msg) => {
     messages.scrollTop = messages.scrollHeight;
 });
 
+socket.on("room-full", () => {
+    document.body.innerHTML = `
+        <h2 style="text-align:center; margin-top:50px;">
+            ❌ This chat is already full (2 users only)
+        </h2>
+    `;
+});
