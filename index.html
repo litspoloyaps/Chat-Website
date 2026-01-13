@@ -1,20 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat Website</title>
-    <link rel="stylesheet" href="style.css">
+  <title>2-Person Live Chat</title>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; }
+    #chat { width: 300px; margin: 50px auto; }
+    #messages { height: 200px; border: 1px solid #ccc; padding: 5px; overflow-y: auto; background: #fff; }
+    input { width: 75%; }
+    button { width: 23%; }
+  </style>
 </head>
 <body>
 
-<div id="chat-container">
-    <ul id="messages"></ul>
-    <form id="form">
-        <input id="input" autocomplete="off" placeholder="Type a message..." />
-        <button>Send</button>
-    </form>
+<div id="chat">
+  <h3>Live Chat (2 users)</h3>
+  <div id="messages"></div>
+  <input id="msg" placeholder="Type message..." />
+  <button onclick="sendMessage()">Send</button>
 </div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="script.js"></script>
+<script>
+  const ws = new WebSocket("ws://localhost:8080");
+  const messages = document.getElementById("messages");
+
+  ws.onmessage = (event) => {
+    const div = document.createElement("div");
+    div.textContent = "Friend: " + event.data;
+    messages.appendChild(div);
+  };
+
+  function sendMessage() {
+    const input = document.getElementById("msg");
+    if (input.value.trim() !== "") {
+      ws.send(input.value);
+      const div = document.createElement("div");
+      div.textContent = "You: " + input.value;
+      messages.appendChild(div);
+      input.value = "";
+    }
+  }
+</script>
+
 </body>
 </html>
