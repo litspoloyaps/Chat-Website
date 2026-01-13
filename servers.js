@@ -23,7 +23,8 @@ io.on("connection", (socket) => {
     console.log("User connected:", users);
 
     socket.on("chat message", (msg) => {
-        socket.broadcast.emit("chat message", msg);
+        // SEND TO EVERYONE (INCLUDING SENDER)
+        io.emit("chat message", msg);
     });
 
     socket.on("disconnect", () => {
