@@ -3,10 +3,14 @@ const form = document.getElementById("form");
 const input = document.getElementById("input");
 const messages = document.getElementById("messages");
 
+// ask username once
+const username = prompt("Enter your name:");
+
 form.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (input.value) {
-        socket.emit("chat message", input.value);
+
+    if (input.value.trim()) {
+        socket.emit("chat message", `${username}: ${input.value}`);
         input.value = "";
     }
 });
