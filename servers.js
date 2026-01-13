@@ -1,39 +1,30 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
+const WebSocket = require("ws");
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+const wss = new WebSocket.Server({ port: 8080 });
+let clients = [];
 
-app.use(express.static("public"));
+wss.on("connection", (ws) => {
+  if (clients.length >= 2) {
+    ws.send("Chat is full (2 users only).");
+    ws.close();
+    return;
+  }
 
-let users = 0;
-const MAX_USERS = 2;
+  clients.push(ws);
+  console.log("User connected");
 
-io.on("connection", (socket) => {
-
-    if (users >= MAX_USERS) {
-        socket.emit("room-full");
-        socket.disconnect(true);
-        return;
-    }
-
-    users++;
-    console.log("User connected:", users);
-
-    socket.on("chat message", (msg) => {
-        // SEND TO EVERYONE (INCLUDING SENDER)
-        io.emit("chat message", msg);
+  ws.on("message", (message) => {
+    clients.forEach(client => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message.toString());
+      }
     });
+  });
 
-    socket.on("disconnect", () => {
-        users--;
-        console.log("User disconnected:", users);
-    });
+  ws.on("close", () => {
+    clients = clients.filter(client => client !== ws);
+    console.log("User disconnected");
+  });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log("Server running on port " + PORT);
-});
+console.log("WebSocket server running on ws://localhost:8080");
